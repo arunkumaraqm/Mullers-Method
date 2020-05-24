@@ -3,54 +3,96 @@ Implementation of Muller's method
 Approximates the root or at least one of the roots for an equation of the form f(x) = 0
 
 Contributors:
-Archana (most of the code)
-Arun (to a lesser extent)
+Archana 
+Arun 
 """
 
 from math import *
+#from cmath import sqrt # Intentionally redefining sqrt
+from itertools import count as counting_forever
 
-expr = input("Enter the function: ")
-expr = expr.replace("^", "**") #** is used for pow in Python
-
-#TODO Support for natural mathematic notation
-#TODO Input validation
-
-x0 = float(input("Initial guess 1: "))
-x1 = float(input("Initial guess 2: "))
-x2 = float(input("Initial guess 3: "))
-#TODO If x0 = x1 or x1 = x2, ZeroDivisionError is raised.
-
-func = lambda x: eval(expr) # Assuming "x" is the independent var
-
-while True: #TODO Please limit noof iterations
+def find_next_guess(func, x0, x1, x2):
     e = func(x0)
     f = func(x1)
     g = func(x2)
 
-    h0 = x1-x0
-    h1 = x2-x1
-    delta0 = (f-e) / h0
-    delta1 = (g-f) / h1
+    h0 = x1 - x0
+    h1 = x2 - x1
+    delta0 = (f - e) / h0
+    delta1 = (g - f) / h1
 
-    a = (delta1-delta0)/(h1+h0)
-    b = (a*h1)+delta1
+    a = (delta1 - delta0) / (h1 + h0)
+    b = (a * h1) + delta1
     c = g
-    d = sqrt((b*b)-(4*a*c)) # Square root of discriminant
-    #TODO Support for complex numbers; Keeps throwing ValueError - math domain error
+    try:
+        d = sqrt((b * b) - (4 * a * c)) # Square root of discriminant
+    except ValueError as err:
+        if str(err) == "math domain error":
+            print("x3 is complex and we don't support that currently.")
+            quit()
+        else:
+            raise ValueError(str(err))
 
     if b < 0:
-        x3 = x2-((2*c)/(b-d))
+        x3 = x2 - ((2 * c) / (b - d))
     else:
-        x3 = x2-((2*c)/(b+d))
+        x3 = x2 - ((2 * c) / (b + d))
 
-    rel_percentage_error = abs(((x3-x2)/x3)*100) # Is it really necessary to calculate this when a simple x3 == x2 comparison is all is required? Plus TODO ZeroDivisionError for x3
+    return x3
 
-    if rel_percentage_error == 0:
-        print("One of the roots is: ", x3) #TODO Maybe set precision unless that defeats the point
-        break
-        
-    else:
-        x0, x1, x2 = x1, x2, x3
+def read_inputs():
+    expr = input("Enter the function: ")
+    expr = expr.replace("^", "**") #** is used for pow in Python
+
+    #TODO Support for natural mathematic notation
+    #TODO Input validation
+
+    x0 = float(input("Initial guess 1: "))
+    x1 = float(input("Initial guess 2: "))
+    x2 = float(input("Initial guess 3: "))
+    #TODO If x0 = x1 or x1 = x2, ZeroDivisionError is raised.
+
+    func = lambda x: eval(expr) # Assuming "x" is the independent var
+
+    return func, x0, x1, x2
+
+def read_inputs_wo_prompts():
+    expr = input()
+    expr = expr.replace("^", "**") #** is used for pow in Python
+
+    #TODO Support for natural mathematic notation
+    #TODO Input validation
+
+    x0 = float(input())
+    x1 = float(input())
+    x2 = float(input())
+    #TODO If x0 = x1 or x1 = x2, ZeroDivisionError is raised.
+
+    func = lambda x: eval(expr) # Assuming "x" is the independent var
+
+    return func, x0, x1, x2
+
+def main():
+    
+    func, x0, x1, x2 = read_inputs_wo_prompts()
+
+    for cnt in counting_forever(): #TODO Please limit noof iterations
+
+        x3 = find_next_guess(func, x0, x1, x2)
+
+        relative_percentage_error = abs(((x3 - x2) / x3) * 100) 
+        # Is it really necessary to calculate this when a simple x3 == x2 comparison 
+        # is all is required? Plus TODO ZeroDivisionError for x3
+
+        if relative_percentage_error == 0:
+            print(f"One of the roots is: {x3 : .4f}") # Is the precision bad?
+            print(f"No. of iterations = {cnt}")
+            break
+            
+        else:
+            x0, x1, x2 = x1, x2, x3
+
+if __name__ == "__main__": main()
 
 """
 TEST CASES
