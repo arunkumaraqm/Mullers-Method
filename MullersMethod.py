@@ -1,6 +1,6 @@
 """
 Implementation of Muller's method
-Approximates the root or at least one of the roots for an equation of the form f(x) = 0
+Approximates one of the roots for an equation of the form f(x) = 0
 
 Contributors:
 Archana 
@@ -8,85 +8,78 @@ Arun
 """
 
 from math import *
-#from cmath import sqrt # Intentionally redefining sqrt
+from cmath import isclose # intentional redefinition
+from cmath import sqrt # Intentionally redefining sqrt
 from itertools import count as counting_forever
+TOLERATED_PERCENTAGE_ERROR = 10 ** (-3)
+MAX_ITERATIONS = 100
 
 def find_next_guess(func, x0, x1, x2):
+    print(x0, x1, x2)
     e = func(x0)
     f = func(x1)
     g = func(x2)
 
+    # test4.1 and test5 throw ZeroDivisionErrors here.
+    # While we can except and check if f(0) = 0, is that the only kind of case 
+    # that will throw such an error?
     h0 = x1 - x0
     h1 = x2 - x1
     delta0 = (f - e) / h0
     delta1 = (g - f) / h1
 
-    a = (delta1 - delta0) / (h1 + h0)
+    a = (delta1 - delta0) / (h1 + h0) 
     b = (a * h1) + delta1
     c = g
-    try:
-        d = sqrt((b * b) - (4 * a * c)) # Square root of discriminant
-    except ValueError as err:
-        if str(err) == "math domain error":
-            print("x3 is complex and we don't support that currently.")
-            quit()
-        else:
-            raise ValueError(str(err))
-
-    if b < 0:
+    d = sqrt((b * b) - (4 * a * c)) # Square root of discriminant
+    
+    if abs(b - d) > abs(b + d): # The denominator should have a large magnitude.
         x3 = x2 - ((2 * c) / (b - d))
     else:
         x3 = x2 - ((2 * c) / (b + d))
 
     return x3
 
-def read_inputs():
-    expr = input("Enter the function: ")
-    expr = expr.replace("^", "**") #** is used for pow in Python
+def read_inputs(disable_prompts = False):
 
-    #TODO Support for natural mathematic notation
-    #TODO Input validation
-
-    x0 = float(input("Initial guess 1: "))
-    x1 = float(input("Initial guess 2: "))
-    x2 = float(input("Initial guess 3: "))
-    #TODO If x0 = x1 or x1 = x2, ZeroDivisionError is raised.
-
-    func = lambda x: eval(expr) # Assuming "x" is the independent var
-
-    return func, x0, x1, x2
-
-def read_inputs_wo_prompts():
+    prompt = "Enter the function: " if not disable_prompts else ""            
     expr = input()
-    expr = expr.replace("^", "**") #** is used for pow in Python
+    expr = expr.replace("^", "**") #** is used 
+    func = lambda x: eval(expr) # Assuming "x" is the independent varfor pow in Python
+    # Caution: Python uses j for sqrt(-1)
 
     #TODO Support for natural mathematic notation
     #TODO Input validation
 
-    x0 = float(input())
-    x1 = float(input())
-    x2 = float(input())
-    #TODO If x0 = x1 or x1 = x2, ZeroDivisionError is raised.
+    def read_guess(guess_no):
+        prompt = f"Initial guess {guess_no}: " if not disable_prompts else ""
+        x = input(prompt)
+        x = complex(x)
+        return x
 
-    func = lambda x: eval(expr) # Assuming "x" is the independent var
+    x0, x1, x2 = read_guess(0), read_guess(1), read_guess(2)
+
+    if isclose(x0, x1) or isclose(x1, x2) or isclose(x2, x0):
+        raise ValueError("At least two of the three guesses are the same.")
+
 
     return func, x0, x1, x2
 
 def main():
     
-    func, x0, x1, x2 = read_inputs_wo_prompts()
+    func, x0, x1, x2 = read_inputs(disable_prompts = True)
 
-    for cnt in counting_forever(): #TODO Please limit noof iterations
+    for iteration_cnt in counting_forever(): 
 
         x3 = find_next_guess(func, x0, x1, x2)
 
-        relative_percentage_error = abs(((x3 - x2) / x3) * 100) 
-        # Is it really necessary to calculate this when a simple x3 == x2 comparison 
         # is all is required? Plus TODO ZeroDivisionError for x3
 
-        if relative_percentage_error == 0:
+        if isclose(x2, x3, rel_tol = TOLERATED_PERCENTAGE_ERROR, abs_tol = TOLERATED_PERCENTAGE_ERROR)\
+           or iteration_cnt >= MAX_ITERATIONS:
             print(f"One of the roots is: {x3 : .4f}") # Is the precision bad?
-            print(f"No. of iterations = {cnt}")
+            print(f"No. of iterations = {iteration_cnt}")
+            print(f"And to make sure, f({x3}) = {func(x3)}")
             break
             
         else:
