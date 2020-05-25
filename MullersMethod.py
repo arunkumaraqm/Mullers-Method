@@ -11,40 +11,48 @@ from cmath import *
 from itertools import count as counting_forever
 TOLERATED_PERCENTAGE_ERROR = 10 ** (-3)
 MAX_ITERATIONS = 100
-DEBUG = False
+DEBUG = True
 
 def find_next_guess(func, x0, x1, x2):
-    # print(x0, x1, x2)
-    e = func(x0)
-    f = func(x1)
-    g = func(x2)
+    #print(x0, x1, x2)
+    try:
+        e = func(x0)
+        f = func(x1)
+        g = func(x2)
+    except:
+        raise ValueError("The function does not meet input criteria.")
+        
+    try:
+        h0 = x1 - x0
+        h1 = x2 - x1
+        delta0 = (f - e) / h0
+        delta1 = (g - f) / h1
 
-    # test4.1 and test5 throw ZeroDivisionErrors here.
-    # While we can except and check if f(0) = 0, is that the only kind of case 
-    # that will throw such an error?
-    h0 = x1 - x0
-    h1 = x2 - x1
-    delta0 = (f - e) / h0
-    delta1 = (g - f) / h1
+        a = (delta1 - delta0) / (h1 + h0) 
+        b = (a * h1) + delta1
+        c = g
+        d = sqrt((b * b) - (4 * a * c)) # Square root of discriminant
+        
+        #print(h0, h1, delta0, delta1, a, b, c, d)
+        
+        if abs(b - d) > abs(b + d): # The denominator should have a large magnitude.
+            x3 = x2 - ((2 * c) / (b - d))
+        else:
+            x3 = x2 - ((2 * c) / (b + d))
 
-    a = (delta1 - delta0) / (h1 + h0) 
-    b = (a * h1) + delta1
-    c = g
-    d = sqrt((b * b) - (4 * a * c)) # Square root of discriminant
-    
-    if abs(b - d) > abs(b + d): # The denominator should have a large magnitude.
-        x3 = x2 - ((2 * c) / (b - d))
-    else:
-        x3 = x2 - ((2 * c) / (b + d))
-
-    return x3
+    except ZeroDivisionError as err:
+        if isclose(func(0), 0):
+            x3 = 0
+        else:
+            raise ZeroDivisionError(str(err) + "; we haven't thought this through.")
+    finally:
+        return x3
 
 def read_inputs(disable_prompts = False):
 
     prompt = "Enter the function: " if not disable_prompts else ""            
     expr = input(prompt)
     expr = expr.replace("^", "**") #** is used for pow in Python
-    expr = expr.replace("i", "j")
     func = lambda x: eval(expr) # Assuming "x" is the independent var
     # Caution: Python uses j for sqrt(-1)
 
@@ -54,7 +62,6 @@ def read_inputs(disable_prompts = False):
     def read_guess(guess_no):
         prompt = f"Initial guess {guess_no}: " if not disable_prompts else ""
         x = input(prompt)
-        x = x.replace("i", "j")
         x = complex(x)
         return x
 
@@ -78,9 +85,9 @@ def main():
 
         if isclose(x2, x3, rel_tol = TOLERATED_PERCENTAGE_ERROR, abs_tol = TOLERATED_PERCENTAGE_ERROR)\
            or iteration_cnt >= MAX_ITERATIONS:
-            print("One of the roots is: ", f"{x3 : .4f}".replace("j", "i")) # Is the precision bad?
+            print(f"One of the roots is: {x3 : .4f}") # Is the precision bad?
             print(f"No. of iterations = {iteration_cnt}")
-            print(f"Verification: f({str(x3).replace('j', 'i')}) = {str(func(x3)).replace('j', 'i')}")
+            print(f"Verification: f({x3}) = {func(x3)}")
             break
             
         else:
