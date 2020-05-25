@@ -7,15 +7,14 @@ Archana
 Arun 
 """
 
-from math import *
-from cmath import isclose # intentional redefinition
-from cmath import sqrt # Intentionally redefining sqrt
+from cmath import *
 from itertools import count as counting_forever
 TOLERATED_PERCENTAGE_ERROR = 10 ** (-3)
 MAX_ITERATIONS = 100
+DEBUG = False
 
 def find_next_guess(func, x0, x1, x2):
-    print(x0, x1, x2)
+    # print(x0, x1, x2)
     e = func(x0)
     f = func(x1)
     g = func(x2)
@@ -43,9 +42,10 @@ def find_next_guess(func, x0, x1, x2):
 def read_inputs(disable_prompts = False):
 
     prompt = "Enter the function: " if not disable_prompts else ""            
-    expr = input()
-    expr = expr.replace("^", "**") #** is used 
-    func = lambda x: eval(expr) # Assuming "x" is the independent varfor pow in Python
+    expr = input(prompt)
+    expr = expr.replace("^", "**") #** is used for pow in Python
+    expr = expr.replace("i", "j")
+    func = lambda x: eval(expr) # Assuming "x" is the independent var
     # Caution: Python uses j for sqrt(-1)
 
     #TODO Support for natural mathematic notation
@@ -54,6 +54,7 @@ def read_inputs(disable_prompts = False):
     def read_guess(guess_no):
         prompt = f"Initial guess {guess_no}: " if not disable_prompts else ""
         x = input(prompt)
+        x = x.replace("i", "j")
         x = complex(x)
         return x
 
@@ -67,9 +68,9 @@ def read_inputs(disable_prompts = False):
 
 def main():
     
-    func, x0, x1, x2 = read_inputs(disable_prompts = True)
+    func, x0, x1, x2 = read_inputs(disable_prompts = DEBUG)
 
-    for iteration_cnt in counting_forever(): 
+    for iteration_cnt in counting_forever(1): 
 
         x3 = find_next_guess(func, x0, x1, x2)
 
@@ -77,9 +78,9 @@ def main():
 
         if isclose(x2, x3, rel_tol = TOLERATED_PERCENTAGE_ERROR, abs_tol = TOLERATED_PERCENTAGE_ERROR)\
            or iteration_cnt >= MAX_ITERATIONS:
-            print(f"One of the roots is: {x3 : .4f}") # Is the precision bad?
+            print("One of the roots is: ", f"{x3 : .4f}".replace("j", "i")) # Is the precision bad?
             print(f"No. of iterations = {iteration_cnt}")
-            print(f"And to make sure, f({x3}) = {func(x3)}")
+            print(f"Verification: f({str(x3).replace('j', 'i')}) = {str(func(x3)).replace('j', 'i')}")
             break
             
         else:
