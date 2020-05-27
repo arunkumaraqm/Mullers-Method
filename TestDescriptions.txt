@@ -1,0 +1,41 @@
+This is a description of all of the tests that we have used.
+
+#1
+Let us start off with some polynomial functions.
+f(x) = x^3 - 13*x - 12 with guesses 4.5, 5.5, 5.0 yields the root 4.
+
+#2
+x^4 - 3*x^2 + x - 10
+The root computed using the guesses _ is _
+(1) 2, 2.5, 3 is 2.1624 in 3 iterations
+(2) -2.5, -3.0, -2.0 is -2.3055 in 3 iterations
+(3) 20, -0.5, 300 is -2.3055 in 21 iterations
+
+When we try using 2.50000000000000004, 2.5 and 3, the program will throw an error because x0 and x1 are pretty much equal and Muller's method needs three distinct guesses.
+
+#3
+f(x) = 2*x^5 - 2*x^4 + 6*x^3 - 6*x^2 + 8*x - 8
+Guesses: 0.808, 0.8, 0.792
+The root computed is 1.
+
+Now, we'll try with a similar function. Here x is replaced by x - 1 and all the guesses are decremented by 1.
+f(x) = 2*(x-1)^5 - 2*(x-1)^4 + 6*(x-1)^3 - 6*(x-1)^2 + 8*(x-1) - 8 
+Guesses: -0.192, -0.2, -0.208
+The root computed is 0 as expected.
+
+#4
+Let's try with polynomials with complex coefficients.
+Note that j will be used instead of i for sqrt(-1).
+
+f(x) = x^2 + 10j * x - 21
+With guesses -8j, -7.5j, -6j, the root computed is -7j.
+With guesses 100, 200, -1000, the root computed is -3j.
+These are the only two roots to the function f.
+
+#5
+Let's try with some transcendental functions. 
+
+f(x) = x - sin(x) - 1/2 with guesses 1.0, 1.5, 2.0; the root computed is 1.4973 in 2 iterations.
+f(x) = cos(x) - x*exp(x) with guesses 1, 1.5, 2; the root computed is 0.5178 in 6 iterations.
+f(x) = tan(x) - x + 2 with guesses 4.2, 4.3, 4.4; the root computed is 4.3027 in 2 iterations.
+
